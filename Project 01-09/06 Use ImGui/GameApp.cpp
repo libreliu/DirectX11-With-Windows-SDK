@@ -61,6 +61,12 @@ void GameApp::UpdateScene(float dt)
     }
     if (ImGui::Begin("Use ImGui"))
     {
+        if (ImGui::Checkbox("Fullscreen", &m_fullScreen)) {
+            m_inTransition = false;
+        }
+        ImGui::Text("- Log: %s", m_fullScreenLog.c_str());
+        ImGui::Text("- In Transition: %s", m_inTransition ? "True" : "False");
+
         ImGui::Checkbox("Animate Cube", &animateCube);
         ImGui::SameLine(0.0f, 25.0f);
         if (ImGui::Button("Reset Params"))
@@ -136,6 +142,30 @@ void GameApp::DrawScene()
 {
     assert(m_pd3dImmediateContext);
     assert(m_pSwapChain);
+
+    BOOL inFullScreen = false; IDXGIOutput *pFullScrRT = nullptr;
+    m_pSwapChain->GetFullscreenState(&inFullScreen, &pFullScrRT);
+    if (m_fullScreen != inFullScreen && !m_inTransition) {
+        // Do mode switch
+        if (pFullScrRT)
+            pFullScrRT->Release();
+
+        HRESULT res = m_pSwapChain->SetFullscreenState(m_fullScreen, nullptr);
+        switch (res) {
+            case DXGI_ERROR_NOT_CURRENTLY_AVAILABLE:
+                m_fullScreenLog = "DXGI_ERROR_NOT_CURRENTLY_AVAILABLE";
+                m_fullScreen = inFullScreen;
+                break;
+            case DXGI_STATUS_MODE_CHANGE_IN_PROGRESS:
+                m_fullScreenLog = "DXGI_STATUS_MODE_CHANGE_IN_PROGRESS";
+                m_inTransition = true;
+                break;
+            case 0:
+                m_fullScreenLog = "Operation queued.";
+                m_inTransition = true;
+                break;
+        }
+    }
 
     static float black[4] = { 0.0f, 0.0f, 0.0f, 1.0f };	// RGBA = (0,0,0,255)
     m_pd3dImmediateContext->ClearRenderTargetView(m_pRenderTargetView.Get(), reinterpret_cast<const float*>(&black));

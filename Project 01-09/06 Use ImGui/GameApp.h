@@ -47,6 +47,9 @@ private:
     ComPtr<ID3D11VertexShader> m_pVertexShader;     // 顶点着色器
     ComPtr<ID3D11PixelShader> m_pPixelShader;       // 像素着色器
     ConstantBuffer m_CBuffer;                       // 用于修改GPU常量缓冲区的变量
+
+    bool m_fullScreen, m_inTransition = false;
+    std::string m_fullScreenLog;
 };
 
 
