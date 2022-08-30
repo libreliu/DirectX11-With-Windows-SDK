@@ -61,6 +61,11 @@ void GameApp::UpdateScene(float dt)
     }
     if (ImGui::Begin("Use ImGui"))
     {
+        int longComputation = 0;
+        for (int i = 0; i < 10000000; i++) {
+            longComputation += rand();
+        }
+        ImGui::Text("Long computation: %d", longComputation);
         if (ImGui::Checkbox("Fullscreen", &m_fullScreen)) {
             m_inTransition = false;
         }
